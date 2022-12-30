@@ -1,0 +1,124 @@
+<html>
+  <head>
+    <title>New Year Countdown</title>
+    <style>
+      /* Add some styling for the countdown timer and notification */
+      body {
+        font-family: "Adirek Sans", sans-serif;
+      }
+      .center {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .countdown {
+        font-size: 36px;
+      }
+      .notification {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        padding: 10px;
+        background-color: #4caf50;
+        color: white;
+        font-size: 18px;
+        border-radius: 3px;
+        animation: fadeInOut 3s;
+      }
+      @keyframes fadeInOut {
+        0% {
+          opacity: 0;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+      /* Add some styling for the Spotify player and login button */
+      .login-button {
+        font-family: "Adirek Sans";
+        background-color: #1db954;
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Add a div to display the countdown timer and login button in the center of the site -->
+    <div class="center">
+      <div class="countdown" id="countdown"></div>
+      <button class="login-button" onclick="loginToDiscord()">Login to Discord</button>
+    </div>
+    <!-- Add a div to display the Happy New Year notification -->
+    <div class="notification" id="notification" style="display:none;">Happy New Year!</div>
+    <!-- Add a Spotify player -->
+    <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/37i9dQZEVXbMDoHDwVN2tF?utm_source=generator" width="100%" height="380" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+    <script>
+      // Set the target date for the countdown (2023-01-01 00:00:00 in the visitor's local time)
+      var targetDate = new Date("2023-01-01T00:00:00");
+      // Get the current timezone offset (in minutes)
+      var currentTimezoneOffset = new Date().getTimezoneOffset();
+      // Get the target timezone offset (in minutes)
+      var targetTimezoneOffset = targetDate.getTimezoneOffset();
+      // Calculate the difference between the target and current timezone offsets (in minutes)
+      var timezoneOffsetDifference = targetTimezoneOffset - currentTimezoneOffset;
+      // Adjust the target date by the difference in timezone offsets (in minutes)
+      targetDate.setMinutes(targetDate.getMinutes() + timezoneOffsetDifference);
+      // Get the current timestamp
+      var currentTimestamp = Date.now();
+      // Calculate the remaining time until the target date
+      var remainingTime = targetDate - currentTimestamp;
+      // Update the countdown timer every second
+      setInterval(function() {
+        // Recalculate the remaining time
+        remainingTime = targetDate - Date.now();
+        // If the remaining time is less than or equal to 0, display the notification and stop the countdown
+        if (remainingTime <= 0) {
+          document.getElementById("countdown").innerHTML = "Happy New Year!";
+          document.getElementById("notification").style.display = "block";
+        } else {
+          // Calculate the number of days, hours, minutes, and seconds remaining
+          var days = Math.floor(remainingTime / (1000 * 60 * 60 * 24));
+          var hours = Math.floor((remainingTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          var minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+          var seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+          // Display the remaining time in the countdown timer
+          document.getElementById("countdown").innerHTML = days + " days " + hours + " hours " + minutes + " minutes " + seconds + " seconds remaining until New Year's Day";
+        }
+      }, 1000);
+      
+      // Add a function to handle the login button click
+      function loginToDiscord() {
+        // Replace YOUR_CLIENT_ID with your actual client ID from the Discord Developer Portal
+        var clientId = "YOUR_CLIENT_ID";
+      // the Discord login window
+      window.location.href = "https://discordapp.com/api/oauth2/authorize?client_id=" + clientId + "&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F&response_type=code&scope=rpc%20rpc.api%20rpc.notifications.read";
+      }
+      
+      // Initialize the Discord client
+      var rpc = new DiscordRPC.Client({ transport: 'websocket' });
+      rpc.login({ clientId }).catch(console.error);
+      rpc.on('ready', () => {
+        // Set the user's rich presence status
+        rpc.setActivity({
+          state: 'Counting down to 2023',
+          startTimestamp: Date.now(),
+          endTimestamp: targetDate,
+          largeImageKey: 'logo',
+          largeImageText: 'New Year Countdown',
+          smallImageKey: 'clock',
+          smallImageText: 'Time remaining:',
+          instance: false,
+        });
+      });
+    </script>
+  </body>
+</html>
